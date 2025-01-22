@@ -1,0 +1,21 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "books-serverless-api",
+	"main": "src/index.js",
+	"compatibility_date": "2025-01-21",
+	"workers_dev": false,
+	"route": {
+		"pattern": "api.dlsdemo.com",
+		"custom_domain": true
+	},
+	"observability": {
+		"enabled": true
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "prod-d1-books-serverless-api",
+			"database_id": "6a73ab2d-fab5-4b6b-b5f4-6085bda2b859"
+		}
+	]
+}

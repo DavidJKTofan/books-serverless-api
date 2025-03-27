@@ -1,0 +1,220 @@
+openapi: 3.0.3
+info:
+  title: Books Serverless API
+  version: 1.0.0
+  description: Serverless API for managing a book collection using Cloudflare Workers and D1
+  contact:
+    name: API Support
+servers:
+  - url: https://api.dlsdemo.com/
+    description: Production server
+paths:
+  /api/health:
+    get:
+      summary: API Health Check
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+  /api/stats:
+    get:
+      summary: Get API Statistics
+      responses:
+        '200':
+          description: Statistics about book collection
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalBooks:
+                    type: integer
+                  genreBreakdown:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        genre:
+                          type: string
+                        count:
+                          type: integer
+                  yearRange:
+                    type: object
+                    properties:
+                      earliest:
+                        type: integer
+                      latest:
+                        type: integer
+  /api/books:
+    get:
+      summary: List Books
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+            maximum: 100
+        - name: genre
+          in: query
+          schema:
+            type: string
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated list of books
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Book'
+                  pagination:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+                      pages:
+                        type: integer
+    post:
+      summary: Create a New Book
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookInput'
+      responses:
+        '201':
+          description: Book created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+  /api/books/{id}:
+    get:
+      summary: Get a Specific Book
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Book details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+    put:
+      summary: Update a Book
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookInput'
+      responses:
+        '200':
+          description: Book updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+    delete:
+      summary: Delete a Book
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Book deleted successfully
+  /api/books/search:
+    get:
+      summary: Search Books
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: string
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Book'
+                  count:
+                    type: integer
+components:
+  schemas:
+    BookInput:
+      type: object
+      required:
+        - title
+        - author
+      properties:
+        title:
+          type: string
+        author:
+          type: string
+        year:
+          type: integer
+          minimum: 0
+        isbn:
+          type: string
+        genre:
+          type: string
+        description:
+          type: string
+    Book:
+      allOf:
+        - $ref: '#/components/schemas/BookInput'
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: integer
